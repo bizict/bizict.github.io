@@ -3,12 +3,37 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ICB 트랙 | 국민대 비즈니스IT전문대학원</title>
-<meta name="description" content="국민대학교 비즈니스IT전문대학원 인플루언서&크리에이터비즈니스(ICB) 트랙. 주말·평일 저녁 수업으로 직장과 병행하며 크리에이터 이코노미의 비즈니스를 배우세요.">
+<title>ICB 트랙 | 국민대 비즈니스IT전문대학원 인플루언서·크리에이터비즈니스</title>
+<meta name="description" content="국민대학교 비즈니스IT전문대학원 인플루언서&크리에이터비즈니스(ICB) 트랙. 주말·평일 저녁 수업으로 직장과 병행하며 크리에이터 이코노미의 비즈니스를 배웁니다. 2027 전기 신입생 모집(원서접수 2026.10.19~11.24).">
+<meta name="keywords" content="ICB 트랙, 인플루언서 비즈니스, 크리에이터 비즈니스, 국민대 대학원, 비즈니스IT전문대학원, 크리에이터 이코노미, 직장인 대학원, 주말 대학원, 2027 전기 모집">
+<meta name="author" content="국민대학교 비즈니스IT전문대학원">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta name="theme-color" content="#0a0a14">
+<link rel="canonical" href="https://bizict.github.io/">
+
+<!-- Open Graph (SNS 공유 미리보기) -->
 <meta property="og:title" content="좋아요를 넘어, 비즈니스로 — ICB 트랙">
-<meta property="og:description" content="국민대 비즈니스IT전문대학원 ICB 트랙 2027 전기 신입생 모집">
+<meta property="og:description" content="국민대 비즈니스IT전문대학원 ICB 트랙 2027 전기 신입생 모집. 주말·평일 저녁 수업으로 일과 병행.">
 <meta property="og:type" content="website">
-<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<meta property="og:url" content="https://bizict.github.io/">
+<meta property="og:site_name" content="국민대 BIT · ICB 트랙">
+<meta property="og:locale" content="ko_KR">
+<!-- og:image: 공유 썸네일. 아래 경로에 1200x630 PNG/JPG를 추가하면 활성화됩니다. (제작 사양은 README 참고) -->
+<meta property="og:image" content="https://bizict.github.io/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="국민대 비즈니스IT전문대학원 ICB 트랙 모집 안내">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="좋아요를 넘어, 비즈니스로 — ICB 트랙">
+<meta name="twitter:description" content="국민대 비즈니스IT전문대학원 ICB 트랙 2027 전기 신입생 모집.">
+<meta name="twitter:image" content="https://bizict.github.io/og-image.png">
+
+<!-- Favicon (인라인 SVG, 그라디언트 테마 반영) -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237c5cff'/%3E%3Cstop offset='.55' stop-color='%23ff4d8d'/%3E%3Cstop offset='1' stop-color='%23ffb347'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='%230a0a14'/%3E%3Ctext x='32' y='44' font-family='Arial,sans-serif' font-size='30' font-weight='bold' text-anchor='middle' fill='url(%23g)'%3EIC%3C/text%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
 :root{
@@ -33,6 +58,11 @@ h2{font-size:clamp(1.9rem,4.4vw,3rem);line-height:1.2;letter-spacing:-.02em;marg
 .btn-primary:hover{transform:translateY(-3px);box-shadow:0 16px 36px -8px rgba(255,77,141,.75)}
 .btn-ghost{background:rgba(255,255,255,.06);color:var(--text);border:1px solid var(--line)}
 .btn-ghost:hover{background:rgba(255,255,255,.12);transform:translateY(-3px)}
+
+/* skip link (키보드 접근성: 평소 숨김, 포커스 시 노출) */
+.skip-link{position:absolute;left:12px;top:-60px;z-index:300;padding:10px 18px;border-radius:0 0 12px 12px;background:var(--grad);color:#fff;font-weight:700;transition:top .2s}
+.skip-link:focus{top:0}
+:focus-visible{outline:3px solid var(--c);outline-offset:3px;border-radius:6px}
 
 /* progress + nav */
 #bar{position:fixed;top:0;left:0;height:3px;width:0;background:var(--grad);z-index:200}
@@ -178,6 +208,13 @@ h1{font-size:clamp(2.6rem,7vw,5rem);line-height:1.08;letter-spacing:-.035em;font
 .chip{padding:12px 20px;border-radius:16px;background:var(--card);border:1px solid var(--line);font-size:.95rem}
 .chip.me{background:var(--grad);border-color:transparent;font-weight:800}
 
+/* facts (한눈에 보는 ICB) */
+.facts{margin-top:40px;display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media(max-width:760px){.facts{grid-template-columns:1fr}}
+.fact{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+.fact dt{font-size:.82rem;font-weight:800;letter-spacing:.04em;color:var(--c);margin-bottom:6px}
+.fact dd{margin:0;color:var(--muted);font-size:.97rem}
+
 /* faq */
 .faq{margin-top:40px;max-width:800px;display:grid;gap:12px}
 details{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:0 22px;transition:border-color .2s}
@@ -204,9 +241,10 @@ footer a:hover{border-color:var(--b)}
 <script>document.documentElement.classList.add('js')</script>
 </head>
 <body>
-<div id="bar"></div>
+<a href="#why" class="skip-link">본문으로 건너뛰기</a>
+<div id="bar" aria-hidden="true"></div>
 
-<nav>
+<nav aria-label="주요 메뉴">
   <div class="wrap">
     <a href="#top-anchor" class="logo">국민대 <b>BIT</b> · ICB</a>
     <div class="links">
@@ -242,7 +280,7 @@ footer a:hover{border-color:var(--b)}
       </div>
     </div>
 
-    <div class="phone-area" id="phone">
+    <div class="phone-area" id="phone" aria-hidden="true">
       <div class="float-chip fc1">📈 데이터로 읽는 반응</div>
       <div class="float-chip fc2">🎬 콘텐츠 기획</div>
       <div class="float-chip fc3">💼 브랜드 협업</div>
@@ -265,16 +303,36 @@ footer a:hover{border-color:var(--b)}
   <div class="track" id="track"></div>
 </div>
 
-<section id="why">
+<main>
+<section id="why" aria-labelledby="why-h">
   <div class="wrap">
     <span class="eyebrow rv">Why ICB</span>
-    <h2 class="rv">콘텐츠는 <span class="grad-text">감각</span>으로 시작하고,<br>비즈니스는 <span class="grad-text">구조</span>로 완성됩니다</h2>
+    <h2 class="rv" id="why-h">콘텐츠는 <span class="grad-text">감각</span>으로 시작하고,<br>비즈니스는 <span class="grad-text">구조</span>로 완성됩니다</h2>
     <p class="lead rv">크리에이터 이코노미가 빠르게 커지면서, 채널을 ‘운영하는 사람’을 넘어 사업으로 ‘설계하는 사람’이 필요해졌습니다. ICB 트랙은 그 사이를 잇습니다.</p>
     <div class="grid3">
       <div class="card rv tilt"><div class="ico">🎥</div><h3>만드는 힘</h3><p>플랫폼과 트렌드를 이해하고, 팬이 반응하는 콘텐츠와 브랜드를 기획하는 감각을 다듬습니다.</p></div>
       <div class="card rv tilt"><div class="ico">📊</div><h3>읽는 힘</h3><p>IT·데이터 기반의 비즈니스IT 교육 위에서, 반응과 성과를 숫자로 해석하고 의사결정에 활용합니다.</p></div>
       <div class="card rv tilt"><div class="ico">🚀</div><h3>키우는 힘</h3><p>수익화, 브랜드 협업, 신사업 구상까지. 개인 채널을 지속 가능한 비즈니스로 확장하는 관점을 갖춥니다.</p></div>
     </div>
+  </div>
+</section>
+
+<section id="summary" aria-labelledby="summary-h">
+  <div class="wrap">
+    <span class="eyebrow rv">At a glance</span>
+    <h2 class="rv" id="summary-h">한눈에 보는 <span class="grad-text">ICB 트랙</span></h2>
+    <p class="lead rv">핵심 정보를 한 번에 정리했습니다. 자세한 내용과 최신 모집요강은 공식 홈페이지에서 확인하세요.</p>
+    <dl class="facts rv">
+      <div class="fact"><dt>운영 기관</dt><dd>국민대학교 비즈니스IT전문대학원(BIT)의 인플루언서&amp;크리에이터비즈니스(ICB) 트랙입니다.</dd></div>
+      <div class="fact"><dt>무엇을 배우나</dt><dd>크리에이터 이코노미에서 콘텐츠를 비즈니스로 키우는 기획·데이터 분석·수익화·사업 확장을 배웁니다.</dd></div>
+      <div class="fact"><dt>모집 대상</dt><dd>전공 무관으로 모집하며, 직장인·프리랜서·크리에이터·졸업 예정자 모두 지원할 수 있습니다.</dd></div>
+      <div class="fact"><dt>수업 방식</dt><dd>평일 저녁과 주말 수업만으로 학위를 취득할 수 있어 일과 병행이 가능합니다.</dd></div>
+      <div class="fact"><dt>취득 학위</dt><dd>경영학·경영정보학·공학·이학 석사 및 박사 학위를 수여합니다.</dd></div>
+      <div class="fact"><dt>모집 일정(2027 전기)</dt><dd>원서 접수 2026.10.19(월)~11.24(화) 16:00, 면접 전형 2026.11.28(토) 예정, 입학 2027년 3월입니다.</dd></div>
+      <div class="fact"><dt>장학 혜택</dt><dd>전일제 연구조교 수업료 100% 면제를 비롯한 다양한 장학 제도가 운영됩니다.</dd></div>
+      <div class="fact"><dt>문의</dt><dd>비즈니스IT대학원 교학팀 02-910-4018 / 4086, business-it@kookmin.ac.kr, 공식 홈페이지 bit.kookmin.ac.kr.</dd></div>
+    </dl>
+    <p class="note">※ 모집 일정·장학 조건 등 세부 사항은 변경될 수 있으니 반드시 공식 홈페이지의 최신 모집요강을 확인하세요.</p>
   </div>
 </section>
 
@@ -287,68 +345,68 @@ footer a:hover{border-color:var(--b)}
   </div>
 </section>
 
-<section id="learn">
+<section id="learn" aria-labelledby="learn-h">
   <div class="wrap">
     <span class="eyebrow rv">What you'll explore</span>
-    <h2 class="rv">ICB에서 <span class="grad-text">이런 방향</span>을 탐구합니다</h2>
+    <h2 class="rv" id="learn-h">ICB에서 <span class="grad-text">이런 방향</span>을 탐구합니다</h2>
     <p class="lead rv">탭을 눌러 학습 영역을 살펴보세요.</p>
-    <div class="tabs rv" role="tablist">
-      <button class="tab on" data-t="0">🎬 Create</button>
-      <button class="tab" data-t="1">📊 Analyze</button>
-      <button class="tab" data-t="2">💰 Monetize</button>
-      <button class="tab" data-t="3">🌱 Lead</button>
+    <div class="tabs rv" role="tablist" aria-label="학습 영역">
+      <button class="tab on" data-t="0" role="tab" aria-selected="true" aria-controls="panel-0" id="tab-0">🎬 Create</button>
+      <button class="tab" data-t="1" role="tab" aria-selected="false" aria-controls="panel-1" id="tab-1">📊 Analyze</button>
+      <button class="tab" data-t="2" role="tab" aria-selected="false" aria-controls="panel-2" id="tab-2">💰 Monetize</button>
+      <button class="tab" data-t="3" role="tab" aria-selected="false" aria-controls="panel-3" id="tab-3">🌱 Lead</button>
     </div>
-    <div class="panel on" data-p="0">
+    <div class="panel on" data-p="0" role="tabpanel" id="panel-0" aria-labelledby="tab-0">
       <div><h3>콘텐츠와 브랜드를 기획한다</h3><p>플랫폼 생태계와 팬덤의 작동 방식을 이해하고, 나만의 채널·브랜드 콘셉트를 설계합니다.</p><div class="tags"><span>콘텐츠 기획</span><span>퍼스널 브랜딩</span><span>플랫폼 이해</span></div></div>
-      <div class="big-emoji">🎬</div>
+      <div class="big-emoji" aria-hidden="true">🎬</div>
     </div>
-    <div class="panel" data-p="1">
+    <div class="panel" data-p="1" role="tabpanel" id="panel-1" aria-labelledby="tab-1">
       <div><h3>반응을 데이터로 읽는다</h3><p>조회수, 참여율, 댓글 같은 신호를 분석해 다음 콘텐츠와 전략을 근거 있게 결정합니다.</p><div class="tags"><span>데이터 분석</span><span>AI 활용</span><span>성과 측정</span></div></div>
-      <div class="big-emoji">📊</div>
+      <div class="big-emoji" aria-hidden="true">📊</div>
     </div>
-    <div class="panel" data-p="2">
+    <div class="panel" data-p="2" role="tabpanel" id="panel-2" aria-labelledby="tab-2">
       <div><h3>수익 구조를 설계한다</h3><p>광고, 협업, 커머스, 구독 등 크리에이터 비즈니스의 수익 모델과 브랜드 파트너십을 이해합니다.</p><div class="tags"><span>수익 모델</span><span>브랜드 협업</span><span>마케팅</span></div></div>
-      <div class="big-emoji">💰</div>
+      <div class="big-emoji" aria-hidden="true">💰</div>
     </div>
-    <div class="panel" data-p="3">
+    <div class="panel" data-p="3" role="tabpanel" id="panel-3" aria-labelledby="tab-3">
       <div><h3>사업을 이끌고 확장한다</h3><p>1인 채널을 팀과 조직, 새로운 서비스로 키워가는 비즈니스 리더십과 문제 해결 능력을 기릅니다.</p><div class="tags"><span>비즈니스 전략</span><span>신사업 구상</span><span>문제 해결</span></div></div>
-      <div class="big-emoji">🌱</div>
+      <div class="big-emoji" aria-hidden="true">🌱</div>
     </div>
     <p class="note">※ 학습 영역은 트랙 방향을 소개하는 예시입니다. 실제 개설 교과목은 공식 홈페이지(bit.kookmin.ac.kr)에서 확인하세요.</p>
   </div>
 </section>
 
-<section id="life" style="background:var(--bg2);border-block:1px solid var(--line)">
+<section id="life" aria-labelledby="life-h" style="background:var(--bg2);border-block:1px solid var(--line)">
   <div class="wrap">
     <span class="eyebrow rv">Work &amp; Study</span>
-    <h2 class="rv">일하면서, 크리에이팅하면서 <span class="grad-text">공부할 수 있어요</span></h2>
+    <h2 class="rv" id="life-h">일하면서, 크리에이팅하면서 <span class="grad-text">공부할 수 있어요</span></h2>
     <p class="lead rv">주말과 평일 저녁 수업만으로 학위를 취득할 수 있습니다. 나의 일상에 수업이 어떻게 들어오는지 눌러서 확인해보세요.</p>
     <div class="sched rv">
-      <div class="seg" id="seg">
-        <button class="on" data-m="0">직장인</button>
-        <button data-m="1">프리랜서·크리에이터</button>
-        <button data-m="2">졸업 예정자</button>
+      <div class="seg" id="seg" role="group" aria-label="유형별 주간 일정">
+        <button class="on" data-m="0" aria-pressed="true">직장인</button>
+        <button data-m="1" aria-pressed="false">프리랜서·크리에이터</button>
+        <button data-m="2" aria-pressed="false">졸업 예정자</button>
       </div>
-      <div class="week" id="week"></div>
+      <div class="week" id="week" aria-live="polite"></div>
       <p class="cap" id="cap"></p>
     </div>
     <p class="note">※ 시간표는 이해를 돕기 위한 예시이며, 실제 수업 요일·시간은 학기별로 다를 수 있습니다.</p>
   </div>
 </section>
 
-<section id="fit">
+<section id="fit" aria-labelledby="fit-h">
   <div class="wrap">
     <span class="eyebrow rv">Quick quiz</span>
-    <h2 class="rv">나는 어떤 <span class="grad-text">ICB형</span> 인재일까?</h2>
+    <h2 class="rv" id="fit-h">나는 어떤 <span class="grad-text">ICB형</span> 인재일까?</h2>
     <p class="lead rv">3문항으로 알아보는 가벼운 성향 테스트예요. (재미로만 봐주세요 😉)</p>
     <div class="quiz rv" id="quiz"></div>
   </div>
 </section>
 
-<section id="benefit" style="background:var(--bg2);border-block:1px solid var(--line)">
+<section id="benefit" aria-labelledby="benefit-h" style="background:var(--bg2);border-block:1px solid var(--line)">
   <div class="wrap">
     <span class="eyebrow rv">Benefits</span>
-    <h2 class="rv">학비 걱정은 덜고, <span class="grad-text">배움</span>에 집중하세요</h2>
+    <h2 class="rv" id="benefit-h">학비 걱정은 덜고, <span class="grad-text">배움</span>에 집중하세요</h2>
     <div class="sch">
       <div class="card hot rv tilt"><span class="pill">HOT</span><h3>전일제 연구조교 장학금</h3><p>수업료 100% 면제 혜택이 제공됩니다.</p></div>
       <div class="card rv tilt"><h3>군·경·공무원 장학금</h3><p>해당 신분의 구성원을 위한 장학 혜택이 마련되어 있습니다.</p></div>
@@ -363,10 +421,10 @@ footer a:hover{border-color:var(--b)}
   </div>
 </section>
 
-<section id="apply">
+<section id="apply" aria-labelledby="apply-h">
   <div class="wrap">
     <span class="eyebrow rv">How to apply</span>
-    <h2 class="rv">2027 전기, <span class="grad-text">지금이 지원 타이밍</span></h2>
+    <h2 class="rv" id="apply-h">2027 전기, <span class="grad-text">지금이 지원 타이밍</span></h2>
     <p class="lead rv">전공 무관으로 모집합니다. 아래 일정을 확인하세요.</p>
     <div class="tl">
       <div class="step rv" id="s1"><i>1</i><h4>원서 접수</h4><p>2026.10.19(월) ~ 11.24(화) 16:00</p></div>
@@ -387,32 +445,36 @@ footer a:hover{border-color:var(--b)}
   </div>
 </section>
 
-<section id="faq" style="background:var(--bg2);border-block:1px solid var(--line)">
+<section id="faq" aria-labelledby="faq-h" style="background:var(--bg2);border-block:1px solid var(--line)">
   <div class="wrap">
     <span class="eyebrow rv">FAQ</span>
-    <h2 class="rv">자주 묻는 질문</h2>
+    <h2 class="rv" id="faq-h">자주 묻는 질문</h2>
     <div class="faq rv">
       <details><summary>전공이 달라도 지원할 수 있나요?</summary><p>모집 공고상 전공 무관으로 안내되어 있습니다. 세부 자격 요건은 모집요강에서 확인해주세요.</p></details>
       <details><summary>직장을 다니면서 병행할 수 있을까요?</summary><p>주말 및 평일 저녁 수업만으로 학위 취득이 가능하도록 운영됩니다. 학기별 시간표는 교학팀에 문의하세요.</p></details>
       <details><summary>IT·코딩을 못하면 어렵지 않을까요?</summary><p>BIT는 IT 지식을 바탕으로 비즈니스 문제를 해결하는 대학원입니다. 수업 난이도와 선수 지식은 개설 과목에 따라 다르므로, 궁금한 점은 교학팀에 먼저 물어보세요.</p></details>
       <details><summary>어떤 학위를 받나요?</summary><p>경영학, 경영정보학, 공학, 이학 석사 및 박사 학위가 수여됩니다.</p></details>
+      <details><summary>ICB 트랙에서는 무엇을 배우나요?</summary><p>크리에이터 이코노미에서 콘텐츠를 비즈니스로 키우는 역량을 배웁니다. 콘텐츠·브랜드 기획, 반응을 읽는 데이터 분석, 광고·협업·커머스 등 수익 모델 설계, 그리고 채널을 사업으로 확장하는 비즈니스 전략을 다룹니다. 실제 개설 교과목은 공식 홈페이지에서 확인하세요.</p></details>
+      <details><summary>2027 전기 모집 일정은 어떻게 되나요?</summary><p>원서 접수는 2026년 10월 19일(월)부터 11월 24일(화) 16:00까지이며, 면접 전형은 2026년 11월 28일(토) 진행 예정, 입학은 2027년 3월입니다. 일정은 변경될 수 있으니 공식 모집요강을 확인하세요.</p></details>
       <details><summary>어디에 문의하면 되나요?</summary><p>비즈니스IT대학원 교학팀 02-910-4018 / 4086, business-it@kookmin.ac.kr 로 문의하세요.</p></details>
     </div>
   </div>
 </section>
 
-<section class="final">
+<section class="final" aria-labelledby="final-h">
   <div class="wrap">
     <span class="eyebrow rv">Your next chapter</span>
-    <h2 class="rv">당신의 채널이,<br><span class="grad-text">당신의 비즈니스</span>가 되는 곳</h2>
+    <h2 class="rv" id="final-h">당신의 채널이,<br><span class="grad-text">당신의 비즈니스</span>가 되는 곳</h2>
     <p class="lead rv">궁금한 점이 있다면 지금 문의해보세요. 가장 좋은 시작은, 일단 말을 거는 것!</p>
     <div class="cta-row rv" style="justify-content:center">
-      <a class="btn btn-primary" href="https://bit.kookmin.ac.kr" target="_blank" rel="noopener">공식 홈페이지 →</a>
+      <a class="btn btn-primary" href="https://bit.kookmin.ac.kr" target="_blank" rel="noopener">공식 홈페이지에서 지원하기 →</a>
       <a class="btn btn-ghost" href="https://www.instagram.com/kmu_bit/" target="_blank" rel="noopener">Instagram @kmu_bit</a>
       <a class="btn btn-ghost" href="mailto:business-it@kookmin.ac.kr">메일 문의</a>
+      <a class="btn btn-ghost" href="tel:+82-2-910-4018">전화 02-910-4018</a>
     </div>
   </div>
 </section>
+</main>
 
 <footer>
   <div class="wrap">
@@ -555,7 +617,7 @@ footer a:hover{border-color:var(--b)}
   /* tabs */
   $$('.tab').forEach(function(b){
     b.onclick=function(){
-      $$('.tab').forEach(function(x){x.classList.toggle('on',x===b)});
+      $$('.tab').forEach(function(x){x.classList.toggle('on',x===b);x.setAttribute('aria-selected',x===b?'true':'false')});
       $$('.panel').forEach(function(p){p.classList.toggle('on',p.dataset.p===b.dataset.t)});
     };
   });
@@ -578,7 +640,7 @@ footer a:hover{border-color:var(--b)}
   }
   $$('#seg button').forEach(function(b){
     b.onclick=function(){
-      $$('#seg button').forEach(function(x){x.classList.toggle('on',x===b)});
+      $$('#seg button').forEach(function(x){x.classList.toggle('on',x===b);x.setAttribute('aria-pressed',x===b?'true':'false')});
       drawWeek(+b.dataset.m);
     };
   });
@@ -599,7 +661,7 @@ footer a:hover{border-color:var(--b)}
   function drawQ(){
     if(qi>=Q.length){
       var m=sc.indexOf(Math.max.apply(null,sc)),r=R[m];
-      qz.innerHTML='<div class="result"><div class="big-emoji">'+r.e+'</div><h3>당신은 <span class="grad-text">'+r.t+'</span>!</h3><p>'+r.d+'</p><div class="cta-row" style="justify-content:center"><a class="btn btn-primary" href="#apply">지원 일정 보기</a><button class="btn btn-ghost" id="retry">다시 해보기</button></div></div>';
+      qz.innerHTML='<div class="result"><div class="big-emoji" aria-hidden="true">'+r.e+'</div><h3>당신은 <span class="grad-text">'+r.t+'</span>!</h3><p>'+r.d+'</p><div class="cta-row" style="justify-content:center"><a class="btn btn-primary" href="#apply">지원 일정 보기</a><button class="btn btn-ghost" id="retry">다시 해보기</button></div></div>';
       $('#retry').onclick=function(){qi=0;sc=[0,0,0];drawQ()};
       return;
     }
@@ -611,6 +673,117 @@ footer a:hover{border-color:var(--b)}
   }
   drawQ();
 })();
+</script>
+
+<!-- 구조화 데이터 (Schema.org JSON-LD): 검색엔진·생성형 AI가 ICB 트랙을 정확한 개체로 이해하도록 돕습니다.
+     사실값은 본문 내용과 일치시킵니다. 모집 일정 등은 공식 모집요강 변경 시 함께 갱신하세요. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "EducationalOrganization",
+      "@id": "https://bizict.github.io/#organization",
+      "name": "국민대학교 비즈니스IT전문대학원",
+      "alternateName": "Graduate School of Business IT, Kookmin University",
+      "url": "https://bit.kookmin.ac.kr",
+      "email": "business-it@kookmin.ac.kr",
+      "telephone": "+82-2-910-4018",
+      "faxNumber": "+82-2-910-4017",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "정릉로 77",
+        "addressLocality": "성북구",
+        "addressRegion": "서울특별시",
+        "postalCode": "02707",
+        "addressCountry": "KR"
+      },
+      "parentOrganization": {
+        "@type": "CollegeOrUniversity",
+        "name": "국민대학교",
+        "url": "https://www.kookmin.ac.kr"
+      },
+      "sameAs": [
+        "https://www.instagram.com/kmu_bit/",
+        "https://bit.kookmin.ac.kr"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://bizict.github.io/#website",
+      "url": "https://bizict.github.io/",
+      "name": "국민대 BIT · ICB 트랙",
+      "inLanguage": "ko-KR",
+      "publisher": { "@id": "https://bizict.github.io/#organization" }
+    },
+    {
+      "@type": "Course",
+      "name": "인플루언서&크리에이터비즈니스(ICB) 트랙",
+      "description": "국민대학교 비즈니스IT전문대학원(BIT)의 ICB 트랙. 크리에이터 이코노미에서 콘텐츠를 비즈니스로 키우는 기획, 데이터 분석, 수익화, 사업 확장을 배웁니다. 전공 무관으로 모집하며 평일 저녁·주말 수업으로 일과 병행이 가능합니다.",
+      "url": "https://bizict.github.io/",
+      "inLanguage": "ko-KR",
+      "educationalLevel": "대학원(석사·박사)",
+      "provider": { "@id": "https://bizict.github.io/#organization" },
+      "hasCourseInstance": {
+        "@type": "CourseInstance",
+        "courseMode": ["Evening", "Weekend"],
+        "description": "평일 저녁 및 주말 수업",
+        "courseSchedule": {
+          "@type": "Schedule",
+          "repeatFrequency": "P1W"
+        }
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "전공이 달라도 지원할 수 있나요?",
+          "acceptedAnswer": { "@type": "Answer", "text": "모집 공고상 전공 무관으로 안내되어 있습니다. 세부 자격 요건은 모집요강에서 확인해 주세요." }
+        },
+        {
+          "@type": "Question",
+          "name": "직장을 다니면서 병행할 수 있을까요?",
+          "acceptedAnswer": { "@type": "Answer", "text": "주말 및 평일 저녁 수업만으로 학위 취득이 가능하도록 운영됩니다. 학기별 시간표는 교학팀에 문의하세요." }
+        },
+        {
+          "@type": "Question",
+          "name": "IT·코딩을 못하면 어렵지 않을까요?",
+          "acceptedAnswer": { "@type": "Answer", "text": "BIT는 IT 지식을 바탕으로 비즈니스 문제를 해결하는 대학원입니다. 수업 난이도와 선수 지식은 개설 과목에 따라 다르므로 교학팀에 먼저 문의하세요." }
+        },
+        {
+          "@type": "Question",
+          "name": "어떤 학위를 받나요?",
+          "acceptedAnswer": { "@type": "Answer", "text": "경영학, 경영정보학, 공학, 이학 석사 및 박사 학위가 수여됩니다." }
+        },
+        {
+          "@type": "Question",
+          "name": "ICB 트랙에서는 무엇을 배우나요?",
+          "acceptedAnswer": { "@type": "Answer", "text": "콘텐츠·브랜드 기획, 반응을 읽는 데이터 분석, 광고·협업·커머스 등 수익 모델 설계, 채널을 사업으로 확장하는 비즈니스 전략을 배웁니다. 실제 개설 교과목은 공식 홈페이지에서 확인하세요." }
+        },
+        {
+          "@type": "Question",
+          "name": "2027 전기 모집 일정은 어떻게 되나요?",
+          "acceptedAnswer": { "@type": "Answer", "text": "원서 접수는 2026년 10월 19일(월)부터 11월 24일(화) 16:00까지이며, 면접 전형은 2026년 11월 28일(토) 진행 예정, 입학은 2027년 3월입니다. 일정은 변경될 수 있으니 공식 모집요강을 확인하세요." }
+        },
+        {
+          "@type": "Question",
+          "name": "어디에 문의하면 되나요?",
+          "acceptedAnswer": { "@type": "Answer", "text": "비즈니스IT대학원 교학팀 02-910-4018 / 4086, business-it@kookmin.ac.kr 로 문의하세요." }
+        }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://bizict.github.io/" },
+        { "@type": "ListItem", "position": 2, "name": "ICB 트랙", "item": "https://bizict.github.io/#why" },
+        { "@type": "ListItem", "position": 3, "name": "지원 일정", "item": "https://bizict.github.io/#apply" }
+      ]
+    }
+  ]
+}
 </script>
 </body>
 </html>
