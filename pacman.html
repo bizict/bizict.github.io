@@ -133,7 +133,12 @@
   .dpad .left  { grid-column: 1; grid-row: 2; }
   .dpad .right { grid-column: 3; grid-row: 2; }
   .dpad .down  { grid-column: 2; grid-row: 3; }
-  .dpad .mid   { grid-column: 2; grid-row: 2; background: transparent; box-shadow: none; pointer-events: none; font-size: 22px; display: flex; align-items: center; justify-content: center; }
+  .dpad .mid-btn {
+    grid-column: 2; grid-row: 2;
+    font-size: 20px;
+    background: linear-gradient(160deg, #ffe66d, #ffcf3d);
+    box-shadow: 0 4px 0 #e0ab2a, 0 6px 12px rgba(255,207,61,0.5);
+  }
 
   #pauseBtn {
     border: none;
@@ -219,19 +224,19 @@
   <div class="dpad">
     <button class="up"    data-dir="up"    aria-label="위">▲</button>
     <button class="left"  data-dir="left"  aria-label="왼쪽">◀</button>
-    <span class="mid">🌸</span>
+    <button class="mid-btn" id="shootBtn" aria-label="화살 발사">�</button>
     <button class="right" data-dir="right" aria-label="오른쪽">▶</button>
     <button class="down"  data-dir="down"  aria-label="아래">▼</button>
   </div>
   <button id="pauseBtn">⏸ 일시정지</button>
 </div>
 
-<div class="hint">방향키 / WASD · 버튼 · 스와이프 · P 또는 스페이스로 일시정지</div>
+<div class="hint">방향키 / WASD 이동 · 스페이스 또는 🏹로 화살 발사 · P로 일시정지</div>
 
 <div id="msg">
   <div class="card">
     <h1 id="msgTitle">♡ PAC-GIRL ♡</h1>
-    <p id="msgText">반짝이는 점을 모두 모으면 승리! 유령 친구들을 피해요 💕</p>
+    <p id="msgText">반짝이는 점을 모두 모으면 승리! 🏹 화살로 유령을 쫓아낼 수 있어요 💕</p>
     <p class="best">BEST <span id="bestMsg">0</span></p>
     <button id="startBtn">게임 시작 ♡</button>
   </div>
@@ -307,11 +312,16 @@
   let grid;              // per-tile: 'wall','dot','power','empty','door'
   let dotsLeft;
   let pac, ghosts;
+  let arrows;            // active arrow projectiles
+  let shootCooldown = 0; // frames until Pac-girl can fire again
   let score, lives, level;
   let running = false;
   let paused = false;
   let frightTimer = 0;   // frames remaining of frightened mode
   let pacSpawn, ghostHouse = [];
+
+  const ARROW_SPEED = 5;     // pixels per frame
+  const SHOOT_COOLDOWN = 24; // frames between shots (~0.4s)
 
   const DIRS = {
     left:  { x: -1, y: 0 },
@@ -378,6 +388,8 @@
       dir: 'left', next: 'left',
       speed: 2, mouth: 0   // speed must divide TILE (16) so centers are hit exactly
     };
+    arrows = [];
+    shootCooldown = 0;
     // Four classic personalities, now cute pastel girls:
     //  - Blinky: chases Pac-Man directly (red/strawberry)
     //  - Pinky:  aims 4 tiles ahead of Pac-Man (pink)
@@ -506,9 +518,13 @@
   function moveGhost(g) {
     if (g.releaseDelay > 0) { g.releaseDelay--; return; }
 
-    // frightened ghosts move slower: skip every 3rd frame
+    // frightened ghosts move slowest: skip every 3rd frame
     if (g.frightened) {
       g.slowTick = (g.slowTick + 1) % 3;
+      if (g.slowTick === 0) return;
+    } else {
+      // normal ghosts are a little slower than Pac-girl: skip every 5th frame
+      g.slowTick = (g.slowTick + 1) % 5;
       if (g.slowTick === 0) return;
     }
 
@@ -560,6 +576,73 @@
 
   function opposite(dir) {
     return { left: 'right', right: 'left', up: 'down', down: 'up' }[dir];
+  }
+
+  // ===== Arrows =====
+  function shootArrow() {
+    if (!running || paused || shootCooldown > 0) return;
+    const d = DIRS[pac.dir];
+    arrows.push({ x: pac.x, y: pac.y, dx: d.x, dy: d.y });
+    shootCooldown = SHOOT_COOLDOWN;
+  }
+
+  function moveArrows() {
+    if (shootCooldown > 0) shootCooldown--;
+    for (let i = arrows.length - 1; i >= 0; i--) {
+      const a = arrows[i];
+      a.x += a.dx * ARROW_SPEED;
+      a.y += a.dy * ARROW_SPEED;
+      // off-board or into a wall: remove
+      const c = Math.floor(a.x / TILE), r = Math.floor(a.y / TILE);
+      if (a.x < 0 || a.x > W || a.y < 0 || a.y > H || tileAt(c, r) === 'wall') {
+        arrows.splice(i, 1);
+        continue;
+      }
+      // hit a ghost? send it home (frightened ghosts give points)
+      let hit = false;
+      for (const g of ghosts) {
+        if (g.releaseDelay > 0) continue;
+        const ddx = g.x - a.x, ddy = g.y - a.y;
+        if (ddx * ddx + ddy * ddy < (TILE * 0.55) ** 2) {
+          score += g.frightened ? 200 : 100;
+          scoreEl.textContent = score;
+          if (score > best) { best = score; bestEl.textContent = best; }
+          const home = ghostHouse[0] || pacSpawn;
+          g.c = home.c; g.r = home.r;
+          g.x = home.c * TILE + TILE / 2;
+          g.y = home.r * TILE + TILE / 2;
+          g.frightened = false;
+          g.releaseDelay = 120; // knocked back into the house for a bit
+          hit = true;
+          break;
+        }
+      }
+      if (hit) arrows.splice(i, 1);
+    }
+  }
+
+  function drawArrows() {
+    for (const a of arrows) {
+      ctx.save();
+      ctx.translate(a.x, a.y);
+      ctx.rotate(Math.atan2(a.dy, a.dx));
+      // shaft
+      ctx.strokeStyle = '#ff6fae';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-6, 0);
+      ctx.lineTo(4, 0);
+      ctx.stroke();
+      // heart-tipped head
+      drawHeart(6, 0, 3, '#ff3d7f');
+      // fletching
+      ctx.strokeStyle = '#c9a7ff';
+      ctx.beginPath();
+      ctx.moveTo(-6, 0); ctx.lineTo(-9, -3);
+      ctx.moveTo(-6, 0); ctx.lineTo(-9, 3);
+      ctx.stroke();
+      ctx.restore();
+    }
   }
 
   // ===== Collisions =====
@@ -630,6 +713,7 @@
 
     drawPac();
     ghosts.forEach(drawGhost);
+    drawArrows();
 
     if (paused) {
       ctx.fillStyle = 'rgba(58,34,80,0.55)';
@@ -818,6 +902,7 @@
     if (!paused) {
       movePac();
       ghosts.forEach(moveGhost);
+      moveArrows();
       checkGhosts();
       if (frightTimer > 0) {
         frightTimer--;
@@ -906,9 +991,8 @@
     A: 'left', D: 'right', W: 'up', S: 'down'
   };
   window.addEventListener('keydown', e => {
-    if (e.key === 'p' || e.key === 'P' || e.key === ' ') {
-      togglePause(); e.preventDefault(); return;
-    }
+    if (e.key === ' ') { shootArrow(); e.preventDefault(); return; }
+    if (e.key === 'p' || e.key === 'P') { togglePause(); e.preventDefault(); return; }
     const dir = KEYMAP[e.key];
     if (dir && pac) { pac.next = dir; e.preventDefault(); }
   });
@@ -920,6 +1004,11 @@
     btn.addEventListener('mousedown', set);
   });
   pauseBtn.addEventListener('click', togglePause);
+
+  const shootBtn = document.getElementById('shootBtn');
+  const fire = e => { shootArrow(); e.preventDefault(); };
+  shootBtn.addEventListener('touchstart', fire, { passive: false });
+  shootBtn.addEventListener('mousedown', fire);
 
   // touch swipe on canvas
   let touchStart = null;
