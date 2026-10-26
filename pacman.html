@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>PAC-MAN</title>
+<style>
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: #05050f;
+    overflow: hidden;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: #ffe66d;
+  }
+  #hud {
+    display: flex;
+    gap: 24px;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-shadow: 0 0 8px rgba(255,230,109,0.5);
+  }
+  canvas {
+    width: min(96vw, 60vh);
+    height: auto;
+    aspect-ratio: 28 / 31;
+    background: #000;
+    image-rendering: pixelated;
+    touch-action: none;
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.3);
+    outline: none;
+    border-radius: 4px;
+  }
+  #msg {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+    background: rgba(5,5,15,0.82);
+    text-align: center;
+  }
+  #msg h1 { margin: 0; font-size: 42px; }
+  #msg p { margin: 0; font-size: 18px; color: #fff; }
+  #msg button {
+    margin-top: 8px;
+    padding: 12px 28px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #05050f;
+    background: #ffe66d;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .hint { font-size: 13px; color: #9aa0b5; letter-spacing: 0; }
+</style>
+</head>
+<body>
+<div id="hud">
+  <span>SCORE <span id="score">0</span></span>
+  <span>LIVES <span id="lives">3</span></span>
+</div>
+<canvas id="game" tabindex="0"></canvas>
+<div class="hint">방향키 또는 WASD로 이동 · 모바일은 스와이프</div>
+
+<div id="msg">
+  <h1 id="msgTitle">PAC-MAN</h1>
+  <p id="msgText">점을 모두 먹으면 승리! 유령을 피하세요.</p>
+  <button id="startBtn">게임 시작</button>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // ===== Maze layout =====
+  // 28 cols x 31 rows. Characters:
+  //   # = wall, . = dot, o = power pellet, space = empty path,
+  //   - = ghost house door, G = ghost spawn, P = pacman spawn
+  const RAW = [
+    "############################",
+    "#............##............#",
+    "#.####.#####.##.#####.####.#",
+    "#o####.#####.##.#####.####o#",
+    "#.####.#####.##.#####.####.#",
+    "#..........................#",
+    "#.####.##.########.##.####.#",
+    "#.####.##.########.##.####.#",
+    "#......##....##....##......#",
+    "######.##### ## #####.######",
+    "     #.##### ## #####.#     ",
+    "     #.##    GG    ##.#     ",
+    "     #.## ###--### ##.#     ",
+    "######.## #      # ##.######",
+    "      .    # GGGG #    .    ",
+    "######.## #      # ##.######",
+    "     #.## ######## ##.#     ",
+    "     #.##          ##.#     ",
+    "     #.## ######## ##.#     ",
+    "######.## ######## ##.######",
+    "#............##............#",
+    "#.####.#####.##.#####.####.#",
+    "#.####.#####.##.#####.####.#",
+    "#o..##.......P .......##..o#",
+    "###.##.##.########.##.##.###",
+    "###.##.##.########.##.##.###",
+    "#......##....##....##......#",
+    "#.##########.##.##########.#",
+    "#.##########.##.##########.#",
+    "#..........................#",
+    "############################"
+  ];
+
+  const COLS = 28, ROWS = 31, TILE = 16;
+  const W = COLS * TILE, H = ROWS * TILE;
+
+  const cv = document.getElementById('game');
+  const ctx = cv.getContext('2d');
+  cv.width = W; cv.height = H;
+
+  const scoreEl = document.getElementById('score');
+  const livesEl = document.getElementById('lives');
+  const msg = document.getElementById('msg');
+  const msgTitle = document.getElementById('msgTitle');
+  const msgText = document.getElementById('msgText');
+  const startBtn = document.getElementById('startBtn');
+
+  // Parsed grid + entities
+  let grid;              // per-tile: 'wall','dot','power','empty','door'
+  let dotsLeft;
+  let pac, ghosts;
+  let score, lives;
+  let running = false;
+  let frightTimer = 0;   // frames remaining of frightened mode
+  let pacSpawn, ghostHouse = [];
+
+  const DIRS = {
+    left:  { x: -1, y: 0 },
+    right: { x: 1,  y: 0 },
+    up:    { x: 0,  y: -1 },
+    down:  { x: 0,  y: 1 }
+  };
+
+  function buildMaze() {
+    grid = [];
+    dotsLeft = 0;
+    ghostHouse = [];
+    for (let r = 0; r < ROWS; r++) {
+      const row = [];
+      for (let c = 0; c < COLS; c++) {
+        const ch = RAW[r][c];
+        if (ch === '#') row.push('wall');
+        else if (ch === '.') { row.push('dot'); dotsLeft++; }
+        else if (ch === 'o') { row.push('power'); dotsLeft++; }
+        else if (ch === '-') row.push('door');
+        else if (ch === 'P') { row.push('empty'); pacSpawn = { c, r }; }
+        else if (ch === 'G') { row.push('empty'); ghostHouse.push({ c, r }); }
+        else row.push('empty');
+      }
+      grid.push(row);
+    }
+  }
+
+  function tileAt(c, r) {
+    if (r < 0 || r >= ROWS) return 'wall';
+    // horizontal tunnel wrap
+    if (c < 0 || c >= COLS) return 'empty';
+    return grid[r][c];
+  }
+
+  // allowDoor: ghosts may pass the house door, Pac-Man may not
+  function isWall(c, r, allowDoor) {
+    const t = tileAt(c, r);
+    if (t === 'door') return !allowDoor;
+    return t === 'wall';
+  }
+
+  function resetEntities() {
+    pac = {
+      c: pacSpawn.c, r: pacSpawn.r,
+      x: pacSpawn.c * TILE + TILE / 2,
+      y: pacSpawn.r * TILE + TILE / 2,
+      dir: 'left', next: 'left',
+      speed: 2, mouth: 0   // speed must divide TILE (16) so centers are hit exactly
+    };
+    const colors = ['#ff0000', '#ffb8ff', '#00ffff', '#ffb852'];
+    const homes = ghostHouse.length >= 4
+      ? [ghostHouse[0], ghostHouse[1], ghostHouse[2], ghostHouse[3]]
+      : [pacSpawn, pacSpawn, pacSpawn, pacSpawn];
+    ghosts = colors.map((color, i) => {
+      const home = homes[i % homes.length];
+      return {
+        c: home.c, r: home.r,
+        x: home.c * TILE + TILE / 2,
+        y: home.r * TILE + TILE / 2,
+        dir: ['up', 'down', 'left', 'right'][i % 4],
+        speed: 2,          // divides TILE (16) so ghosts align to centers
+        slowTick: 0,
+        color,
+        frightened: false,
+        releaseDelay: i * 60
+      };
+    });
+  }
+
+  // An entity sits exactly on a tile center when its pixel position
+  // equals that tile's center. We move in integer pixel steps that
+  // divide TILE (speed is a divisor of 16), so centers are hit exactly.
+  function atCenter(e) {
+    return e.x === e.c * TILE + TILE / 2 &&
+           e.y === e.r * TILE + TILE / 2;
+  }
+
+  function snapToTile(e) {
+    e.c = Math.round((e.x - TILE / 2) / TILE);
+    e.r = Math.round((e.y - TILE / 2) / TILE);
+    e.x = e.c * TILE + TILE / 2;
+    e.y = e.r * TILE + TILE / 2;
+  }
+
+  function canGo(c, r, dir, allowDoor) {
+    const d = DIRS[dir];
+    let nc = c + d.x;
+    // horizontal tunnel: wrapping is allowed
+    if (nc < 0) nc = COLS - 1;
+    if (nc >= COLS) nc = 0;
+    return !isWall(nc, r + d.y, allowDoor);
+  }
+
+  function wrap(e) {
+    if (e.x < -TILE / 2) { e.c = COLS - 1; e.x = e.c * TILE + TILE / 2; }
+    if (e.x > W + TILE / 2) { e.c = 0; e.x = e.c * TILE + TILE / 2; }
+  }
+
+  // ===== Pac-Man movement =====
+  function movePac() {
+    if (atCenter(pac)) {
+      // we are exactly on a tile: eat, then decide direction
+      eatAt(pac.c, pac.r);
+      if (canGo(pac.c, pac.r, pac.next)) pac.dir = pac.next;
+      if (!canGo(pac.c, pac.r, pac.dir)) { // blocked: stop here
+        pac.mouth = 0;
+        return;
+      }
+    }
+    const d = DIRS[pac.dir];
+    pac.x += d.x * pac.speed;
+    pac.y += d.y * pac.speed;
+    // when we cross onto a new tile center, update tile indices
+    if (atCenter(pac)) snapToTile(pac);
+    else {
+      pac.c = Math.round((pac.x - TILE / 2) / TILE);
+      pac.r = Math.round((pac.y - TILE / 2) / TILE);
+    }
+    wrap(pac);
+    pac.mouth = (pac.mouth + 0.2) % (Math.PI / 2);
+  }
+
+  function eatAt(c, r) {
+    const t = grid[r][c];
+    if (t === 'dot') {
+      grid[r][c] = 'empty'; score += 10; dotsLeft--;
+    } else if (t === 'power') {
+      grid[r][c] = 'empty'; score += 50; dotsLeft--;
+      frightTimer = 7 * 60; // ~7 seconds
+      ghosts.forEach(g => g.frightened = true);
+    }
+    scoreEl.textContent = score;
+    if (dotsLeft <= 0) win();
+  }
+
+  // ===== Ghost movement (greedy chase / flee) =====
+  function moveGhost(g) {
+    if (g.releaseDelay > 0) { g.releaseDelay--; return; }
+
+    // frightened ghosts move slower: skip every 3rd frame
+    if (g.frightened) {
+      g.slowTick = (g.slowTick + 1) % 3;
+      if (g.slowTick === 0) return;
+    }
+
+    if (atCenter(g)) {
+      // choose direction at tile center
+      const opts = [];
+      for (const dir in DIRS) {
+        if (!canGo(g.c, g.r, dir, true)) continue;
+        // don't reverse unless it's the only option (dead end)
+        const d = DIRS[dir], rev = DIRS[g.dir];
+        if (d.x === -rev.x && d.y === -rev.y) continue;
+        opts.push(dir);
+      }
+      const choices = opts.length ? opts : [opposite(g.dir)];
+
+      // target: chase pac, or flee when frightened
+      let best = choices[0], bestScore = Infinity;
+      for (const dir of choices) {
+        const d = DIRS[dir];
+        const nc = g.c + d.x, nr = g.r + d.y;
+        const dist = (nc - pac.c) ** 2 + (nr - pac.r) ** 2;
+        const metric = g.frightened ? -dist : dist;
+        if (metric < bestScore) { bestScore = metric; best = dir; }
+      }
+      // add some randomness when frightened
+      if (g.frightened && Math.random() < 0.4 && choices.length) {
+        best = choices[(Math.random() * choices.length) | 0];
+      }
+      g.dir = best;
+      // if somehow blocked, don't move into a wall
+      if (!canGo(g.c, g.r, g.dir, true)) return;
+    }
+    const d = DIRS[g.dir];
+    g.x += d.x * g.speed;
+    g.y += d.y * g.speed;
+    if (atCenter(g)) snapToTile(g);
+    else {
+      g.c = Math.round((g.x - TILE / 2) / TILE);
+      g.r = Math.round((g.y - TILE / 2) / TILE);
+    }
+    wrap(g);
+  }
+
+  function opposite(dir) {
+    return { left: 'right', right: 'left', up: 'down', down: 'up' }[dir];
+  }
+
+  // ===== Collisions =====
+  function checkGhosts() {
+    for (const g of ghosts) {
+      const dx = g.x - pac.x, dy = g.y - pac.y;
+      if (dx * dx + dy * dy < (TILE * 0.7) ** 2) {
+        if (g.frightened) {
+          score += 200; scoreEl.textContent = score;
+          const home = ghostHouse[0] || pacSpawn;
+          g.c = home.c; g.r = home.r;
+          g.x = home.c * TILE + TILE / 2;
+          g.y = home.r * TILE + TILE / 2;
+          g.frightened = false;
+          g.releaseDelay = 90;
+        } else {
+          loseLife();
+          return;
+        }
+      }
+    }
+  }
+
+  function loseLife() {
+    lives--;
+    livesEl.textContent = lives;
+    if (lives <= 0) { gameOver(); return; }
+    resetEntities();
+  }
+
+  // ===== Rendering =====
+  function draw() {
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, W, H);
+
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const t = grid[r][c];
+        const x = c * TILE, y = r * TILE;
+        if (t === 'wall') {
+          ctx.fillStyle = '#1919c0';
+          ctx.fillRect(x + 2, y + 2, TILE - 4, TILE - 4);
+          ctx.fillStyle = '#2a2aff';
+          ctx.fillRect(x + 4, y + 4, TILE - 8, TILE - 8);
+        } else if (t === 'door') {
+          ctx.fillStyle = '#ffb8ff';
+          ctx.fillRect(x + 2, y + TILE / 2 - 1, TILE - 4, 2);
+        } else if (t === 'dot') {
+          ctx.fillStyle = '#ffe0a0';
+          ctx.beginPath();
+          ctx.arc(x + TILE / 2, y + TILE / 2, 2, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (t === 'power') {
+          ctx.fillStyle = '#ffe0a0';
+          ctx.beginPath();
+          ctx.arc(x + TILE / 2, y + TILE / 2, 5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+
+    drawPac();
+    ghosts.forEach(drawGhost);
+  }
+
+  function drawPac() {
+    const a = pac.mouth;
+    let rot = 0;
+    if (pac.dir === 'right') rot = 0;
+    else if (pac.dir === 'down') rot = Math.PI / 2;
+    else if (pac.dir === 'left') rot = Math.PI;
+    else rot = -Math.PI / 2;
+
+    ctx.save();
+    ctx.translate(pac.x, pac.y);
+    ctx.rotate(rot);
+    ctx.fillStyle = '#ffe600';
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.arc(0, 0, TILE / 2 - 1, a, Math.PI * 2 - a);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawGhost(g) {
+    const rad = TILE / 2 - 1;
+    const x = g.x, y = g.y;
+    ctx.fillStyle = g.frightened
+      ? (frightTimer < 120 && Math.floor(frightTimer / 15) % 2 ? '#fff' : '#2121ff')
+      : g.color;
+    ctx.beginPath();
+    ctx.arc(x, y, rad, Math.PI, 0);
+    ctx.lineTo(x + rad, y + rad);
+    // wavy skirt
+    const n = 3;
+    for (let i = 0; i < n; i++) {
+      const w = (rad * 2) / n;
+      const sx = x + rad - w * i;
+      ctx.lineTo(sx - w / 2, y + rad - 4);
+      ctx.lineTo(sx - w, y + rad);
+    }
+    ctx.closePath();
+    ctx.fill();
+
+    // eyes
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(x - 4, y - 2, 3, 0, Math.PI * 2);
+    ctx.arc(x + 4, y - 2, 3, 0, Math.PI * 2);
+    ctx.fill();
+    const look = DIRS[g.dir] || DIRS.left;
+    ctx.fillStyle = g.frightened ? '#fff' : '#001';
+    ctx.beginPath();
+    ctx.arc(x - 4 + look.x * 1.5, y - 2 + look.y * 1.5, 1.5, 0, Math.PI * 2);
+    ctx.arc(x + 4 + look.x * 1.5, y - 2 + look.y * 1.5, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // ===== Game loop =====
+  function tick() {
+    if (!running) return;
+    movePac();
+    ghosts.forEach(moveGhost);
+    checkGhosts();
+
+    if (frightTimer > 0) {
+      frightTimer--;
+      if (frightTimer === 0) ghosts.forEach(g => g.frightened = false);
+    }
+
+    draw();
+    requestAnimationFrame(tick);
+  }
+
+  function startGame() {
+    buildMaze();
+    resetEntities();
+    score = 0; lives = 3;
+    scoreEl.textContent = score;
+    livesEl.textContent = lives;
+    frightTimer = 0;
+    msg.style.display = 'none';
+    running = true;
+    cv.focus();
+    requestAnimationFrame(tick);
+  }
+
+  function gameOver() {
+    running = false;
+    msgTitle.textContent = 'GAME OVER';
+    msgText.textContent = '최종 점수: ' + score;
+    startBtn.textContent = '다시 하기';
+    msg.style.display = 'flex';
+  }
+
+  function win() {
+    running = false;
+    msgTitle.textContent = 'YOU WIN!';
+    msgText.textContent = '모든 점을 먹었어요! 점수: ' + score;
+    startBtn.textContent = '다시 하기';
+    msg.style.display = 'flex';
+  }
+
+  // ===== Input =====
+  const KEYMAP = {
+    ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down',
+    a: 'left', d: 'right', w: 'up', s: 'down',
+    A: 'left', D: 'right', W: 'up', S: 'down'
+  };
+  window.addEventListener('keydown', e => {
+    const dir = KEYMAP[e.key];
+    if (dir) { pac.next = dir; e.preventDefault(); }
+  });
+
+  // touch swipe
+  let touchStart = null;
+  cv.addEventListener('touchstart', e => {
+    const t = e.touches[0];
+    touchStart = { x: t.clientX, y: t.clientY };
+  }, { passive: true });
+  cv.addEventListener('touchmove', e => {
+    if (!touchStart) return;
+    const t = e.touches[0];
+    const dx = t.clientX - touchStart.x, dy = t.clientY - touchStart.y;
+    if (Math.abs(dx) < 20 && Math.abs(dy) < 20) return;
+    if (Math.abs(dx) > Math.abs(dy)) pac.next = dx > 0 ? 'right' : 'left';
+    else pac.next = dy > 0 ? 'down' : 'up';
+    touchStart = { x: t.clientX, y: t.clientY };
+    e.preventDefault();
+  }, { passive: false });
+
+  startBtn.addEventListener('click', startGame);
+
+  // initial splash
+  buildMaze();
+  resetEntities();
+  score = 0; lives = 3;
+  draw();
+  msg.style.display = 'flex';
+})();
+</script>
+</body>
+</html>
