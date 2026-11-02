@@ -31,6 +31,10 @@
 <body>
 <canvas id="game" tabindex="0"></canvas>
 
+<!-- Supabase 연동 (설정이 비어 있으면 자동으로 localStorage 전용 모드) -->
+<script src="game/supabase-config.js"></script>
+<script src="game/leaderboard.js"></script>
+
 <script>
 (() => {
   'use strict';
@@ -219,6 +223,40 @@
 
   try { hi = +localStorage.getItem('starfighter_hi') || 0; } catch (e) { hi = 0; }
 
+  // 클라우드 리더보드 상태
+  let leaderboard = [];        // [{ player_name, score, stage }]
+  let lbLoading = false;
+
+  function refreshLeaderboard() {
+    const cloud = window.StarFighterCloud;
+    if (!cloud || !cloud.ready) return;
+    lbLoading = true;
+    cloud.topScores(5).then(rows => {
+      leaderboard = rows || [];
+      lbLoading = false;
+    });
+  }
+
+  function doLogin() {
+    const cloud = window.StarFighterCloud;
+    if (!cloud || !cloud.ready) return;
+    const prev = (cloud.getUser && cloud.getUser() && cloud.getUser().name) || cloud.savedName() || '';
+    const name = window.prompt('리더보드에 표시할 닉네임 (최대 24자)', prev);
+    if (name === null) return;            // 취소
+    cloud.signIn(name).then(res => {
+      if (res && res.ok) refreshLeaderboard();
+    });
+  }
+
+  // 클라우드 초기화(세션 복원) + 최초 리더보드 로드
+  if (window.StarFighterCloud && window.StarFighterCloud.ready) {
+    window.StarFighterCloud.init().then(() => {
+      refreshLeaderboard();
+      // 실시간 구독: 누군가 새 점수를 올리면 리더보드 갱신
+      window.StarFighterCloud.onLeaderboard(() => refreshLeaderboard());
+    });
+  }
+
   const stars = [];
   for (let i = 0; i < 90; i++) {
     stars.push({
@@ -249,6 +287,7 @@
       else if (state === 'pause') state = 'play';
     }
     if (e.code === 'KeyM') muted = !muted;
+    if (e.code === 'KeyL' && (state === 'title' || state === 'gameover')) doLogin();
   });
   addEventListener('keyup', e => { keys[e.code] = false; });
   addEventListener('blur', () => {
@@ -326,6 +365,13 @@
     if (score > hi) {
       hi = score;
       try { localStorage.setItem('starfighter_hi', String(hi)); } catch (e) { /* ignore */ }
+    }
+    // 클라우드 점수 제출 + 리더보드 갱신 (연동이 꺼져 있으면 안전하게 no-op)
+    if (window.StarFighterCloud) {
+      const cloud = window.StarFighterCloud;
+      if (cloud.getUser && cloud.getUser()) {
+        cloud.submitScore({ score, stage, shots, hits }).then(refreshLeaderboard);
+      }
     }
   }
 
@@ -758,6 +804,17 @@
     text('P   일시정지   M   음소거', W / 2, 498, 14, '#cfd8ff', 'center', KFONT);
     text('터치 : 드래그하여 이동 (자동 발사)', W / 2, 522, 12, '#8fa0d8', 'center', KFONT);
 
+    // 로그인 상태 / 안내 (클라우드 연동 시)
+    const cloud = window.StarFighterCloud;
+    if (cloud && cloud.ready) {
+      const u = cloud.getUser && cloud.getUser();
+      if (u && u.id !== 'local') {
+        text('PLAYER: ' + String(u.name).slice(0, 16), W / 2, 548, 13, '#7CFC00', 'center', KFONT);
+      } else {
+        text('L : 로그인하고 점수 등록', W / 2, 548, 13, '#ffb703', 'center', KFONT);
+      }
+    }
+
     if (((t * 2) | 0) % 2 === 0) {
       text('PRESS ENTER OR SPACE', W / 2, 580, 20, '#ffd23f', 'center');
     }
@@ -765,15 +822,36 @@
 
   function drawGameOver() {
     overlay(0.6);
-    text('GAME OVER', W / 2, 200, 48, '#ff4d6d', 'center');
-    text('SCORE  ' + score, W / 2, 280, 22, '#ffffff', 'center');
-    text('HI-SCORE  ' + hi, W / 2, 316, 22, '#ffd23f', 'center');
+    text('GAME OVER', W / 2, 150, 44, '#ff4d6d', 'center');
+    text('SCORE  ' + score, W / 2, 212, 20, '#ffffff', 'center');
+    text('HI-SCORE  ' + hi, W / 2, 242, 20, '#ffd23f', 'center');
     const rate = shots ? Math.round(hits / shots * 100) : 0;
-    text('SHOTS ' + shots + '   HITS ' + hits, W / 2, 360, 16, '#cfd8ff', 'center');
-    text('HIT RATIO  ' + rate + '%', W / 2, 388, 18, '#4cc9f0', 'center');
-    text('STAGE ' + stage, W / 2, 420, 16, '#cfd8ff', 'center');
+    text('HIT RATIO ' + rate + '%   STAGE ' + stage, W / 2, 272, 14, '#4cc9f0', 'center');
+
+    // 전역 리더보드 (클라우드 연동이 켜져 있을 때만)
+    const cloud = window.StarFighterCloud;
+    if (cloud && cloud.ready) {
+      text('- GLOBAL TOP 5 -', W / 2, 320, 14, '#ffd23f', 'center');
+      if (lbLoading && !leaderboard.length) {
+        text('LOADING...', W / 2, 352, 14, '#8fa0d8', 'center');
+      } else if (!leaderboard.length) {
+        text('아직 기록이 없습니다', W / 2, 352, 13, '#8fa0d8', 'center', KFONT);
+      } else {
+        leaderboard.forEach((r, i) => {
+          const y = 348 + i * 26;
+          const nm = String(r.player_name || 'PLAYER').slice(0, 10);
+          text((i + 1) + '.', W / 2 - 150, y, 14, '#cfd8ff', 'left');
+          text(nm, W / 2 - 128, y, 14, '#ffffff', 'left');
+          text(String(r.score).padStart(6, '0'), W / 2 + 150, y, 14, '#4cc9f0', 'right');
+        });
+      }
+      if (!cloud.getUser || !cloud.getUser()) {
+        text('L : 로그인하고 점수 등록', W / 2, 500, 13, '#ffb703', 'center', KFONT);
+      }
+    }
+
     if (t - overT > 0.8 && ((t * 2) | 0) % 2 === 0) {
-      text('PRESS ENTER OR SPACE', W / 2, 500, 20, '#ffd23f', 'center');
+      text('PRESS ENTER OR SPACE', W / 2, 540, 18, '#ffd23f', 'center');
     }
   }
 
