@@ -1,2 +1,17 @@
-# Kiro 로컬 설정 (MCP 서버 설정, steering 등 - 커밋 제외)
-.kiro/
+# =============================================================
+# Kiro 설정: 기본은 전부 제외하되, "비밀이 없는 안전한 파일"만 화이트리스트로 추적.
+# 이렇게 하면 미래에 MCP 비밀키 등이 실수로 커밋되는 사고를 막으면서,
+# steering 규칙과 MCP 샘플은 저장소에 보존해 공용 PC에서 복구할 수 있다.
+# =============================================================
+.kiro/*
+!.kiro/steering/
+.kiro/steering/*
+!.kiro/steering/*.md
+!.kiro/mcp.sample.json
+
+# MCP 실제 설정(민감할 수 있음)은 절대 커밋 금지
+.kiro/settings/
+
+# 로컬 Supabase 비밀(service_role 키 등)이 들어갈 수 있는 파일
+supabase/.env
+supabase/.secret*

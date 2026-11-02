@@ -1,0 +1,10 @@
+{
+  "_comment": "복구용 샘플. 공용 PC 초기화 후, 이 내용을 ~/.kiro/settings/mcp.json 에 붙여넣고 Kiro에서 Notion 재연결(OAuth) 하세요. 비밀값 없음(URL만).",
+  "mcpServers": {
+    "notion": {
+      "url": "https://mcp.notion.com/mcp",
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}
